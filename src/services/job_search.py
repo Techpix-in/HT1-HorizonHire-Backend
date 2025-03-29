@@ -2,7 +2,7 @@ from typing import List
 from agno.agent import Agent
 from agno.models.openai import OpenAIChat
 from firecrawl import FirecrawlApp
-from models.job_search_model import ExtractSchema
+from src.models.job_search_model import ExtractSchema
 from dotenv import load_dotenv
 
 # un-comment it to run job_search file seperately

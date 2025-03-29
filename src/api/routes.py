@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Body, Request, HTTPException
-from services.job_search import JobHuntingAgent
-from models.job_search_model import JobRequirements
 from dotenv import load_dotenv
 import os
 from langfuse.decorators import observe
 import uuid
-from redis_module.records import ResponseModel
-from redis_module.cache import Cache
-from redis_module.config import Redis
+from src.services.job_search import JobHuntingAgent
+from src.models.job_search_model import JobRequirements
+from src.redis_module.records import ResponseModel
+from src.redis_module.cache import Cache
+from src.redis_module.config import Redis
 import logging
 
 load_dotenv()
