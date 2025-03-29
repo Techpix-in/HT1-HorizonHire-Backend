@@ -23,6 +23,7 @@ model_id = os.getenv("MODEL")
 
 # instance created for the JobSchema
 job_agent = JobHuntingAgent(firecrawl_api_key=firecrawl_api_key,openai_api_key=openai_api_key,model_id=model_id)
+redis_client = Redis()
 
 @router.get("/health_check/")
 def test_health():
@@ -32,33 +33,35 @@ def test_health():
 @router.post("/generate_token/")
 async def token_generator(request: Request):
     try:
-        logging.info("test 1")
-        redis_client = Redis()
-
         token = str(uuid.uuid4())
+        logging.info(f"token generated [{token}]")
 
         response_model = ResponseModel(
             token=str(token),
             msg="Hello there",
         )
-        logging.info("test 2")
+
         # creating redis connection
         await redis_client.create_connection()
-        logging.info(f"Connection created successfully")
         cache = Cache(redis_client)
-        await cache.add_response_to_cache(token=str(token),message_data=response_model.model_dump())
-        logging.info(f"token saved to cahche successfully")
 
+        # saving token to cache
+        await cache.add_response_to_cache(token=str(token),message_data=response_model.model_dump())
         return {"token": token}
     
     except:
         raise HTTPException(status_code=400, detail={
             "Response": "Something went wrong in token generation"})
+
+@router.post("/pdf_data_extract")
+async def extract_pdf_data():
     
+    pass
 
 @router.post("/find_jobs/")
-async def find_matching_jobs(job_requirement: JobRequirements = Body()):
+async def find_matching_jobs(token:str, job_requirement: JobRequirements = Body()):
     try:
+        logging.info(f"token is {token}")
         job_title = job_requirement.job_title
         location = job_requirement.location
         experience_years = job_requirement.experience
@@ -70,7 +73,19 @@ async def find_matching_jobs(job_requirement: JobRequirements = Body()):
             experience_years=experience_years,
             skills=skills
         )
-        
+        print(response)
+        if response:
+            # token = "9cfc387a-3d0f-433a-a702-25d12eb2c575"
+            response_model = ResponseModel(
+                    token=str(token),
+                    msg=str(response),
+            )
+            await redis_client.create_connection()
+            logging.info(f"Connection created successfully")
+            cache = Cache(redis_client)
+            await cache.add_response_to_cache(token=str(token),message_data=response_model.model_dump())
+            logging.info(f"token saved to cahche successfully")
+            pass
         if not response:
             raise HTTPException(status_code=404, detail="No jobs found matching the criteria")
         

@@ -4,10 +4,10 @@ from agno.models.openai import OpenAIChat
 from firecrawl import FirecrawlApp
 from models.job_search_model import ExtractSchema
 from dotenv import load_dotenv
-import os
-import sys
 
 # un-comment it to run job_search file seperately
+# import os
+# import sys
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 # from src.models.job_search_model import ExtractSchema
@@ -27,6 +27,7 @@ class JobHuntingAgent:
         #     description="You are a career expert who helps find job opportunities based on user preferences."
         # )
         self.firecrawl = FirecrawlApp(api_key=firecrawl_api_key)
+        # self.redis_client = Redis()
 
     def find_jobs(
         self, 
