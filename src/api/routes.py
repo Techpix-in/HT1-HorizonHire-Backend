@@ -1,0 +1,80 @@
+from fastapi import APIRouter, Depends, HTTPException, Body, Request, HTTPException
+from services.job_search import JobHuntingAgent
+from models.job_search_model import JobRequirements
+from dotenv import load_dotenv
+import os
+from langfuse.decorators import observe
+import uuid
+from redis_module.records import ResponseModel
+from redis_module.cache import Cache
+from redis_module.config import Redis
+import logging
+
+load_dotenv()
+
+router = APIRouter()
+
+firecrawl_api_key = os.getenv("FIRE_CRAWL_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY")
+model_id = os.getenv("MODEL")
+
+# os.environ["LANGFUSE_SECRET_KEY"] = os.getenv("LANGFUSE_SECRET_KEY")
+# os.environ["LANGFUSE_PUBLIC_KEY"] = os.getenv("LANGFUSE_PUBLIC_KEY")
+
+# instance created for the JobSchema
+job_agent = JobHuntingAgent(firecrawl_api_key=firecrawl_api_key,openai_api_key=openai_api_key,model_id=model_id)
+
+@router.get("/health_check/")
+def test_health():
+    return {"message": "App is runnung!!"}
+
+
+@router.post("/generate_token/")
+async def token_generator(request: Request):
+    try:
+        logging.info("test 1")
+        redis_client = Redis()
+
+        token = str(uuid.uuid4())
+
+        response_model = ResponseModel(
+            token=str(token),
+            msg="Hello there",
+        )
+        logging.info("test 2")
+        # creating redis connection
+        await redis_client.create_connection()
+        logging.info(f"Connection created successfully")
+        cache = Cache(redis_client)
+        await cache.add_response_to_cache(token=str(token),message_data=response_model.model_dump())
+        logging.info(f"token saved to cahche successfully")
+
+        return {"token": token}
+    
+    except:
+        raise HTTPException(status_code=400, detail={
+            "Response": "Something went wrong in token generation"})
+    
+
+@router.post("/find_jobs/")
+async def find_matching_jobs(job_requirement: JobRequirements = Body()):
+    try:
+        job_title = job_requirement.job_title
+        location = job_requirement.location
+        experience_years = job_requirement.experience
+        skills = job_requirement.skills
+
+        response = job_agent.find_jobs(
+            job_title=job_title,
+            location=location,
+            experience_years=experience_years,
+            skills=skills
+        )
+        
+        if not response:
+            raise HTTPException(status_code=404, detail="No jobs found matching the criteria")
+        
+        return response
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

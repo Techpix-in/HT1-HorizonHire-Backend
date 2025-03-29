@@ -1,0 +1,13 @@
+streamlit>=1.30.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+firecrawl>=0.1.0
+agno>=0.1.0
+openai>=1.0.0
+fastapi>=0.68.1
+uvicorn==0.34.0
+langfuse>=2.60.0
+duckduckgo-search>=7.5.0
+# aioredis==2.0.1
+# rejson==0.5.6 
+redis==4.2.0
