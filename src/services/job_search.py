@@ -62,13 +62,15 @@ class JobHuntingAgent:
                     - Job Type: Full-time, Part-time, Contract, Temporary, Internship (optional)
                     
                     For each job posting, extract:
+                    - company name : name of the company which listed the job (e.g., "Google", "Microsoft")
                     - region: The broader region or area where the job is located (e.g., "Northeast", "West Coast", "Midwest")
                     - role: The specific role or function (e.g., "Frontend Developer", "Data Analyst")
                     - job_title: The exact title of the job
                     - experience: The experience requirement in years or level (e.g., "3-5 years", "Senior")
                     - job_link: The link to the job posting
                     
-                    IMPORTANT: You **MUST** Return data for at least 5 different job opportunities even if **criteria is not fully full-filled**. MAXIMUM 10.
+                    IMPORTANT: You **MUST** Return data for at least 5 different job opportunities even if **criteria is not fully full-filled**. MAXIMUM 30.
+                    IMPORTANT: Use all different URL provided
                     """,
                     'schema': ExtractSchema.model_json_schema()
                 }

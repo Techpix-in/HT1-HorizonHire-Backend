@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Body, Request, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body, Request, HTTPException,UploadFile, File
 from dotenv import load_dotenv
 import os
 from langfuse.decorators import observe
@@ -8,11 +8,13 @@ from src.models.job_search_model import JobRequirements
 from src.redis_module.records import ResponseModel
 from src.redis_module.cache import Cache
 from src.redis_module.config import Redis
+from src.services.pdf_parse import ParsePdf
 import logging
 
 load_dotenv()
 
 router = APIRouter()
+parse_pdf = ParsePdf()
 
 firecrawl_api_key = os.getenv("FIRE_CRAWL_API_KEY")
 openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -53,10 +55,16 @@ async def token_generator(request: Request):
         raise HTTPException(status_code=400, detail={
             "Response": "Something went wrong in token generation"})
 
-@router.post("/pdf_data_extract")
-async def extract_pdf_data():
+@router.post("/pdf_data_extract/")
+async def extract_pdf_data(resume: UploadFile = File(...)):
     
-    pass
+    contents = await resume.read()  # Read the file content
+
+    extracted_text = parse_pdf.extract_text_from_pdf(contents)
+    extracted_info = parse_pdf.extract_info_with_gpt(extracted_text)
+
+    return extracted_info
+
 
 @router.post("/find_jobs/")
 async def find_matching_jobs(token:str, job_requirement: JobRequirements = Body()):
