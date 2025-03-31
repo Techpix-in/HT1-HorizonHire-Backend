@@ -1,5 +1,5 @@
 ## Job-Hunt-AI
-this repo is created for hackathon within Techpix Organisation
+this repo is created by Team Avengers(AMAN, RAHUL, ABHINN, SONAL) for hackathon within Techpix Organisation
 
 ## Step to run
 
